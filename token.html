@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Login</title>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+</head>
+<body>
+    <div id="fb-login-button"></div>
+    <script>
+        // Initialize the Facebook SDK
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: 'YOUR_APP_ID', // Replace with your Facebook App ID
+                cookie: true,
+                xfbml: true,
+                version: 'v12.0'
+            });
+
+            // Check login status
+            FB.getLoginStatus(function(response) {
+                if (response.status === 'connected') {
+                    console.log('Logged in with Facebook!');
+                    // Send token to your backend
+                    verifyToken(response.authResponse.accessToken);
+                } else {
+                    console.log('Not logged in with Facebook');
+                }
+            });
+        };
+
+        // Facebook login function
+        function fbLogin() {
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    console.log('Logged in successfully!');
+                    verifyToken(response.authResponse.accessToken);
+                } else {
+                    console.log('User cancelled login or did not fully authorize.');
+                }
+            }, {scope: 'public_profile,email'});
+        }
+
+        // Verify the token with your server
+        function verifyToken(accessToken) {
+            fetch('https://your-backend-url.com/verify-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: accessToken })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+    <button onclick="fbLogin()">Login with Facebook</button>
+</body>
+</html>
